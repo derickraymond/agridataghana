@@ -1,8 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured, supabaseAnonKey, supabaseUrl } from "@/lib/config/env";
+import { ROLE_DASHBOARD } from "@/lib/config/roles";
 
 const AUTH_PAGES = ["/login", "/register", "/forgot-password"];
+const ADMIN_AUTH_PAGES = ["/admin/login"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -41,11 +43,23 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && AUTH_PAGES.includes(path)) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    url.search = "";
-    return NextResponse.redirect(url);
+  if (user) {
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle();
+    const role = profile?.role as keyof typeof ROLE_DASHBOARD | undefined;
+
+    if (ADMIN_AUTH_PAGES.includes(path)) {
+      const url = request.nextUrl.clone();
+      url.pathname = role === "administrator" ? "/dashboard/admin" : (role ? ROLE_DASHBOARD[role] : "/dashboard");
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
+
+    if (AUTH_PAGES.includes(path)) {
+      const url = request.nextUrl.clone();
+      url.pathname = role ? ROLE_DASHBOARD[role] : "/dashboard";
+      url.search = "";
+      return NextResponse.redirect(url);
+    }
   }
 
   return response;

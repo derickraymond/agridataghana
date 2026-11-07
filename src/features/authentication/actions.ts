@@ -67,12 +67,40 @@ export async function signIn(_: FormState, formData: FormData): Promise<FormStat
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error.issues) };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) {
     const unconfirmed = error.code === "email_not_confirmed";
     return { error: unconfirmed ? "Please verify your email address before signing in." : "Invalid email or password." };
   }
+
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.user.id).maybeSingle();
+  if (profile && profile.role === "administrator") {
+    redirect("/dashboard/admin");
+  }
+
   redirect(safeNext(formData.get("next")));
+}
+
+export async function signInAdmin(_: FormState, formData: FormData): Promise<FormState> {
+  if (!isSupabaseConfigured) return NOT_CONFIGURED;
+  const parsed = loginSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error.issues) };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
+  if (error) {
+    const unconfirmed = error.code === "email_not_confirmed";
+    return { error: unconfirmed ? "Please verify your email address before signing in." : "Invalid email or password." };
+  }
+
+  const { data: profile } = await supabase.from("profiles").select("role, verification_status, account_status").eq("id", data.user.id).maybeSingle();
+  if (!profile || profile.role !== "administrator") {
+    return { error: "This account does not have administrator access." };
+  }
+  if (profile.account_status === "suspended") {
+    return { error: "This administrator account is suspended. Contact the platform owner." };
+  }
+  redirect(safeNext(formData.get("next")) ?? "/dashboard/admin");
 }
 
 export async function signOut() {

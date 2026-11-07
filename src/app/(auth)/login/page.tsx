@@ -29,6 +29,12 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
           Create an account
         </Link>
       </p>
+      <p className="mt-4 text-center text-sm text-charcoal-700">
+        Admin access?{" "}
+        <Link href="/admin/login" className="font-semibold text-forest-700 hover:underline">
+          Sign in here
+        </Link>
+      </p>
     </div>
   );
 }
