@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme {
+  --color-forest-50: #eff6f1;
+  --color-forest-100: #d8eadd;
+  --color-forest-200: #b1d5bb;
+  --color-forest-700: #14532d;
+  --color-forest-800: #0f3f23;
+  --color-forest-900: #0a2e19;
+  --color-fresh-400: #5cc26f;
+  --color-fresh-500: #3aa655;
+  --color-fresh-600: #2b8a43;
+  --color-charcoal-50: #f5f6f6;
+  --color-charcoal-200: #d9dcdc;
+  --color-charcoal-500: #5d6363;
+  --color-charcoal-700: #3a3f3f;
+  --color-charcoal-900: #202323;
+  --color-earth-50: #f8f3ec;
+  --color-earth-100: #eee2d0;
+  --color-earth-500: #b0793a;
+  --color-earth-700: #7b5226;
+  --color-danger: #b42318;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+}
+
+body {
+  background: #fff;
+  color: var(--color-charcoal-900);
+}
+
+h1,
+h2 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-fresh-500);
+  outline-offset: 2px;
+}
+
+.field-pattern {
+  background-image:
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 22px),
+    linear-gradient(135deg, var(--color-forest-900), var(--color-forest-700));
+}

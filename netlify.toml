@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# The Netlify-managed Next.js adapter (OpenNext) is applied automatically; no plugin entry is needed.
+# HTTPS and HTTP->HTTPS redirects are handled by Netlify once the domain is attached.
+# Security headers live in next.config.mjs so they apply in every environment.
+
+# Contexts: production = production branch, branch-deploy = staging, deploy-preview = pull requests.
+# Set NEXT_PUBLIC_SITE_URL per context in the Netlify UI (see docs/DEPLOYMENT.md).
+[context.deploy-preview.environment]
+  NEXT_TELEMETRY_DISABLED = "1"
