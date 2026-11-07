@@ -143,6 +143,7 @@ export default async function Page() {
     ]);
 
     const totalKg = (harvests.data ?? []).reduce((sum, item) => sum + Number(item.quantity_kg || 0), 0);
+    const chartMax = Math.max((farmsRes.data ?? []).length, cycles.count ?? 0, totalKg, listings.count ?? 0, orders.count ?? 0, 1);
 
     return (
       <div className="space-y-8">
@@ -168,6 +169,17 @@ export default async function Page() {
             <Link href="/dashboard/orders" className="font-medium text-forest-700 underline">Orders</Link>
           </div>
         </Card>
+
+        <Card className="p-5">
+          <h2 className="text-xl font-semibold text-forest-900">Production activity</h2>
+          <div className="mt-4 space-y-4">
+            <ProgressBar label="Farms" value={(farmsRes.data ?? []).length} total={chartMax} />
+            <ProgressBar label="Crop cycles" value={cycles.count ?? 0} total={chartMax} />
+            <ProgressBar label="Harvest volume" value={Math.round(totalKg)} total={chartMax} />
+            <ProgressBar label="Active listings" value={listings.count ?? 0} total={chartMax} />
+            <ProgressBar label="Orders received" value={orders.count ?? 0} total={chartMax} />
+          </div>
+        </Card>
       </div>
     );
   }
@@ -183,6 +195,7 @@ export default async function Page() {
   ]);
 
   const label = profile.role === "buyer" ? "Buyer analytics" : "Exporter analytics";
+  const chartMax = Math.max(orders.count ?? 0, listings.count ?? 0, enquiries.count ?? 0, 1);
 
   return (
     <div className="space-y-8">
@@ -205,6 +218,16 @@ export default async function Page() {
           <Link href="/marketplace" className="font-medium text-forest-700 underline">Browse marketplace</Link>
           <Link href="/dashboard/orders" className="font-medium text-forest-700 underline">Orders</Link>
           <Link href="/dashboard/enquiries" className="font-medium text-forest-700 underline">Enquiries</Link>
+        </div>
+      </Card>
+
+      <Card className="p-5">
+        <h2 className="text-xl font-semibold text-forest-900">Trading activity</h2>
+        <div className="mt-4 space-y-4">
+          <ProgressBar label={profile.role === "buyer" ? "Orders placed" : "Orders managed"} value={orders.count ?? 0} total={chartMax} />
+          <ProgressBar label="Active listings" value={listings.count ?? 0} total={chartMax} />
+          <ProgressBar label="Enquiries" value={enquiries.count ?? 0} total={chartMax} />
+          <ProgressBar label={profile.role === "buyer" ? "Buying activity" : "Export activity"} value={Math.max(orders.count ?? 0, listings.count ?? 0, enquiries.count ?? 0)} total={chartMax} />
         </div>
       </Card>
     </div>
