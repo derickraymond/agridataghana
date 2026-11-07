@@ -19,12 +19,27 @@ function Stat({ label, value, href, tone }: { label: string; value: number; href
   return href ? <Link href={href}>{body}</Link> : body;
 }
 
+function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
+  const width = total > 0 ? (value / total) * 100 : 0;
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between text-sm">
+        <span className="capitalize text-charcoal-700">{label}</span>
+        <span className="font-semibold text-forest-900">{value}</span>
+      </div>
+      <div className="h-2.5 overflow-hidden rounded-full bg-charcoal-100">
+        <div className="h-full rounded-full bg-forest-600" style={{ width: `${width}%` }} />
+      </div>
+    </div>
+  );
+}
+
 export default async function Page() {
   const { profile } = await requireAdmin();
   const supabase = await createClient();
   const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
 
-  const [total, awaiting, suspended, rejected, unhandled, events24h, roles, recent, farmsRes, harvestRes] = await Promise.all([
+  const [total, awaiting, suspended, rejected, unhandled, events24h, roles, recent, farmsRes, harvestRes, listingsRes, ordersRes, pricesRes, advisoriesRes] = await Promise.all([
     countProfiles({}),
     countProfiles({}, true),
     countProfiles({ account_status: "suspended" }),
@@ -35,12 +50,27 @@ export default async function Page() {
     supabase.from("audit_logs").select("*").order("created_at", { ascending: false }).limit(8),
     supabase.from("farms").select("size_hectares", { count: "exact" }).limit(5000),
     supabase.from("harvests").select("quantity_kg").limit(5000),
+    supabase.from("listings").select("id", { count: "exact", head: true }).eq("status", "active"),
+    supabase.from("orders").select("id", { count: "exact", head: true }),
+    supabase.from("commodity_prices").select("id", { count: "exact", head: true }),
+    supabase.from("advisories").select("id", { count: "exact", head: true }).eq("status", "published"),
   ]);
   const farmHa = (farmsRes.data ?? []).reduce((s, f) => s + Number(f.size_hectares), 0);
   const harvestKg = (harvestRes.data ?? []).reduce((s, h) => s + Number(h.quantity_kg), 0);
 
   const roleCounts = new Map<string, number>();
   for (const r of roles.data ?? []) roleCounts.set(r.role, (roleCounts.get(r.role) ?? 0) + 1);
+  const roleEntries = [...roleCounts.entries()].sort((a, b) => b[1] - a[1]);
+  const maxRoleValue = Math.max(...roleEntries.map(([, count]) => count), 1);
+  const chartMax = Math.max(
+    total,
+    farmsRes.count ?? 0,
+    listingsRes.count ?? 0,
+    ordersRes.count ?? 0,
+    pricesRes.count ?? 0,
+    advisoriesRes.count ?? 0,
+    1,
+  );
   const logs = (recent.data as AuditLog[] | null) ?? [];
 
   return (
@@ -65,17 +95,14 @@ export default async function Page() {
       <div className="grid gap-6 lg:grid-cols-2">
         <section>
           <h2 className="mb-3 text-xl font-semibold text-forest-900">Accounts by role</h2>
-          <Card className="divide-y divide-charcoal-100 p-0">
-            {[...roleCounts.entries()].sort((a, b) => b[1] - a[1]).map(([role, n]) => (
-              <Link
-                key={role}
-                href={`/dashboard/admin/users?role=${role}`}
-                className="flex items-center justify-between px-4 py-2.5 text-sm hover:bg-forest-50"
-              >
-                <span>{ROLE_LABELS[role as UserRole] ?? role}</span>
-                <span className="font-semibold text-forest-900">{n}</span>
-              </Link>
-            ))}
+          <Card className="p-5">
+            <div className="space-y-4">
+              {roleEntries.map(([role, count]) => (
+                <Link key={role} href={`/dashboard/admin/users?role=${role}`} className="block">
+                  <ProgressBar label={ROLE_LABELS[role as UserRole] ?? role} value={count} total={maxRoleValue} />
+                </Link>
+              ))}
+            </div>
           </Card>
         </section>
 
@@ -97,6 +124,20 @@ export default async function Page() {
           </Card>
         </section>
       </div>
+
+      <section>
+        <h2 className="mb-3 text-xl font-semibold text-forest-900">Platform activity</h2>
+        <Card className="p-5">
+          <div className="space-y-4">
+            <ProgressBar label="Accounts" value={total} total={chartMax} />
+            <ProgressBar label="Farms" value={farmsRes.count ?? 0} total={chartMax} />
+            <ProgressBar label="Listings" value={listingsRes.count ?? 0} total={chartMax} />
+            <ProgressBar label="Orders" value={ordersRes.count ?? 0} total={chartMax} />
+            <ProgressBar label="Prices" value={pricesRes.count ?? 0} total={chartMax} />
+            <ProgressBar label="Advisories" value={advisoriesRes.count ?? 0} total={chartMax} />
+          </div>
+        </Card>
+      </section>
 
       <section>
         <h2 className="mb-3 text-xl font-semibold text-forest-900">Coming in later phases</h2>
