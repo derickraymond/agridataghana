@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/session";
-import { Badge, Card } from "@/components/ui/card";
+import { Alert, Badge, Card } from "@/components/ui/card";
+import { CreateUserForm } from "@/components/admin/create-user-form";
 import { ManageActions } from "@/components/admin/user-actions";
 import { formatDate, listAdminUsers } from "@/lib/admin/data";
 import { ACCOUNT_TYPES, ROLE_LABELS } from "@/lib/config/roles";
 
 export const metadata = { title: "Users" };
 
-type Search = { q?: string; role?: string; status?: string; page?: string };
+type Search = { q?: string; role?: string; status?: string; page?: string; error?: string; deleted?: string };
 
 export default async function Page({ searchParams }: { searchParams: Promise<Search> }) {
   const { user: me } = await requireAdmin();
@@ -33,6 +34,16 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
         <h1 className="text-3xl font-semibold text-forest-900">Users</h1>
         <p className="mt-1 text-charcoal-500">{total} accounts. Every change you make here is recorded in the activity log.</p>
       </div>
+
+      {sp.error && <Alert tone="error">{sp.error}</Alert>}
+      {sp.deleted && <Alert tone="success">Account deleted.</Alert>}
+
+      <details className="rounded-xl border border-charcoal-200 bg-white p-4">
+        <summary className="cursor-pointer font-semibold text-forest-900">Create a new account</summary>
+        <div className="mt-4">
+          <CreateUserForm />
+        </div>
+      </details>
 
       <form className="flex flex-wrap gap-2" role="search">
         <input name="q" defaultValue={sp.q} placeholder="Search name, phone or location" className={`${field} min-w-56 flex-1`} />

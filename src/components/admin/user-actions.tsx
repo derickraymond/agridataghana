@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ACCOUNT_TYPES, ROLE_LABELS } from "@/lib/config/roles";
-import { reviewAccount, setAccountStatus, setRole } from "@/features/admin/actions";
+import { deleteUser, reviewAccount, setAccountStatus, setRole } from "@/features/admin/actions";
+import { ConfirmButton } from "@/components/admin/confirm-button";
 import type { AdminUser } from "@/types/database";
 
 const selectClass = "rounded-lg border border-charcoal-200 bg-white px-2 py-1.5 text-sm";
@@ -75,6 +76,10 @@ export function ManageActions({ user, isSelf }: { user: AdminUser; isSelf: boole
         <Button size="sm" variant="outline">
           {user.account_status === "active" ? "Suspend" : "Reinstate"}
         </Button>
+      </form>
+      <form action={deleteUser}>
+        <input type="hidden" name="userId" value={user.id} />
+        <ConfirmButton message={`Permanently delete ${user.full_name}? This cannot be undone.`}>Delete</ConfirmButton>
       </form>
     </div>
   );

@@ -13,6 +13,7 @@ Supabase Postgres with Row Level Security on every table.
 7. `20260112000000_intelligence.sql` – prices, advisories
 8. `20260113000000_traceability.sql`
 9. `20260114000000_phase8.sql` – public organisation view, analytics, export logging
+10. `20260115000000_admin_user_management.sql` – admin create/delete user functions
 
 Apply with the Supabase CLI (`supabase db push`) or paste each file into the SQL editor.
 

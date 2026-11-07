@@ -34,6 +34,8 @@ const ACTION_LABELS: Record<string, string> = {
   "price.published": "Price published",
   "batch.created": "Batch created",
   "batch.event": "Batch event recorded",
+  "user.created": "Account created by admin",
+  "user.deleted": "Account deleted",
   "export.users": "Users exported",
   "export.listings": "Listings exported",
   "export.orders": "Orders exported",
