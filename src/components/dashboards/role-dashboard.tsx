@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Badge, Card } from "@/components/ui/card";
-import { ROLE_LABELS, type UserRole } from "@/lib/config/roles";
+import { ANALYTICS_ROLES, ROLE_LABELS, type UserRole } from "@/lib/config/roles";
 import { ROLE_MODULES } from "@/lib/config/dashboard-modules";
 import type { Profile } from "@/types/database";
 
@@ -75,6 +75,14 @@ export function RoleDashboard({ profile, role }: { profile: Profile; role: UserR
           Prices &amp; advice
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {ANALYTICS_ROLES.includes(role) && (
+            <Link href="/dashboard/analytics">
+              <Card className="h-full transition-shadow hover:shadow-md">
+                <h3 className="font-semibold text-forest-900">Analytics</h3>
+                <p className="mt-1 text-sm text-charcoal-500">Role-based overview of farms, listings, orders and market activity.</p>
+              </Card>
+            </Link>
+          )}
           {role === "extension_agent" && (
             <Link href="/dashboard/advisories">
               <Card className="h-full transition-shadow hover:shadow-md">

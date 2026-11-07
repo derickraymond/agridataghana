@@ -32,6 +32,8 @@ export const APPROVAL_REQUIRED_TYPES: AccountType[] = ["extension_agent", "insti
 
 export const REGISTRATION_TYPES: AccountType[] = [...SELF_SERVICE_TYPES, ...APPROVAL_REQUIRED_TYPES];
 
+export const ANALYTICS_ROLES: UserRole[] = ["administrator", "farmer", "buyer", "exporter"];
+
 export const ROLE_LABELS: Record<UserRole, string> = {
   farmer: "Farmer",
   cooperative: "Cooperative",
